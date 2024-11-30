@@ -22,11 +22,11 @@ jobs:
     - name: Login to Aliyun Registry
       run: docker login -u $ALIYUN_REGISTRY_USER -p $ALIYUN_REGISTRY_PASSWORD $ALIYUN_REGISTRY
 
-    - name: Preprocess Images
-      id: preprocess_images
+    - name: Preprocess and Push Images
       run: |
         declare -A duplicate_image_names
         declare -A namespace_map
+
         while IFS= read -r line; do
           # 忽略空行与注释
           [[ -z "$line" || "$line" =~ ^\s*# ]] && continue
@@ -55,34 +55,17 @@ jobs:
           else
             namespace_map[$image_name]=$namespace
           fi
-        done < images.txt
 
-        # 将结果存储为输出变量
-        echo "duplicate_image_names=$(declare -p duplicate_image_names)" >> $GITHUB_ENV
-        echo "namespace_map=$(declare -p namespace_map)" >> $GITHUB_ENV
-
-    - name: Process and Push Images
-      run: |
-        eval "declare -A duplicate_image_names=${duplicate_image_names}"
-        eval "declare -A namespace_map=${namespace_map}"
-
-        while IFS= read -r line; do
-          # 忽略空行与注释
-          [[ -z "$line" || "$line" =~ ^\s*# ]] && continue
-
+          # 拉取镜像
           echo "Docker Pull: $line"
           docker pull "$line"
 
+          # 获取平台信息
           platform=$(echo "$line" | awk -F'--platform[ =]' '{if (NF>1) print $2}' | awk '{print $1}')
           echo "Platform: $platform"
 
           local platform_prefix="${platform//\//--}_"
           echo "Platform Prefix: $platform_prefix"
-
-          local full_image_name=$(echo "$line" | awk '{print $NF}' | cut -d '@' -f1)
-          local image_name_with_tag=$(basename "$full_image_name")
-          local namespace=$(dirname "$full_image_name" | awk -F'/' '{if (NF==3) print $2; else if (NF==2) print $1; else print ""}')
-          local image_name=$(echo "$image_name_with_tag" | cut -d ':' -f1)
 
           local namespace_prefix=""
           if [[ -n "${duplicate_image_names[$image_name]}" && -n "$namespace" ]]; then
