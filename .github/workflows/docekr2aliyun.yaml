@@ -1,6 +1,6 @@
 name: Docker镜像转存到阿里云私有仓库
 
-on: workflow_dispatch:
+on: workflow_dispatch
 
 env:
   ALIYUN_REGISTRY: "${{ secrets.ALIYUN_REGISTRY }}"
