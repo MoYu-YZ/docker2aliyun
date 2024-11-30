@@ -28,53 +28,56 @@ jobs:
         declare -A namespace_map
 
         while IFS= read -r line; do
-          # 忽略空行与注释
-          [[ -z "$line" || "$line" =~ ^\s*# ]] && continue
+            # 忽略空行与注释
+            [[ -z "$line" || "$line" =~ ^\s*# ]] && continue
 
-          # 获取镜像的完整名称
-          full_image_name=$(echo "$line" | awk '{print $NF}' | cut -d '@' -f1)
-          echo "Full Image Name: $full_image_name"
+            # 获取镜像的完整名称
+            full_image_name=$(echo "$line" | awk '{print $NF}' | cut -d '@' -f1)
+            echo "Full Image Name: $full_image_name"
 
-          # 获取镜像名:版本号
-          image_name_with_tag=$(basename "$full_image_name")
-          echo "Image Name with Tag: $image_name_with_tag"
+            # 获取镜像名:版本号
+            image_name_with_tag=$(basename "$full_image_name")
+            echo "Image Name with Tag: $image_name_with_tag"
 
-          # 获取命名空间
-          namespace=$(dirname "$full_image_name" | awk -F'/' '{if (NF==3) print $2; else if (NF==2) print $1; else print ""}')
-          namespace="${namespace:-default}"
-          echo "Namespace: $namespace"
+            # 获取命名空间
+            namespace=$(dirname "$full_image_name" | awk -F'/' '{if (NF==3) print $2; else if (NF==2) print $1; else print ""}')
+            namespace="${namespace:-default}"
+            echo "Namespace: $namespace"
 
-          # 获取镜像名
-          image_name=$(echo "$image_name_with_tag" | cut -d ':' -f1)
-          echo "Image Name: $image_name"
+            # 获取镜像名
+            image_name=$(echo "$image_name_with_tag" | cut -d ':' -f1)
+            echo "Image Name: $image_name"
 
-          # 检查镜像名是否重名
-          if [[ -n "${namespace_map[$image_name]}" && "${namespace_map[$image_name]}" != "$namespace" ]]; then
-            echo "Duplicate image name: $image_name"
-            duplicate_image_names[$image_name]="true"
-          else
-            namespace_map[$image_name]=$namespace
-          fi
+            # 检查镜像名是否重名
+            if [[ -n "${namespace_map[$image_name]}" && "${namespace_map[$image_name]}" != "$namespace" ]]; then
+                echo "Duplicate image name: $image_name"
+                duplicate_image_names[$image_name]="true"
+            else
+                namespace_map[$image_name]=$namespace
+            fi
 
-          # 拉取镜像
-          echo "Docker Pull: $line"
-          docker pull "$line"
+            # 拉取镜像
+            echo "Docker Pull: $line"
+            docker pull "$line"
 
-          # 获取平台信息
-          platform=$(echo "$line" | awk -F'--platform[ =]' '{if (NF>1) print $2}' | awk '{print $1}')
-          echo "Platform: $platform"
+            # 获取平台信息
+            platform=$(echo "$line" | awk -F'--platform[ =]' '{if (NF>1) print $2}' | awk '{print $1}')
+            echo "Platform: $platform"
 
-          local platform_prefix="${platform//\//--}_"
-          echo "Platform Prefix: $platform_prefix"
+            platform_prefix=""
+            if [[ -n "$platform" ]]; then
+                platform_prefix="${platform//\//--}_"
+            fi
+            echo "Platform Prefix: $platform_prefix"
 
-          local namespace_prefix=""
-          if [[ -n "${duplicate_image_names[$image_name]}" && -n "$namespace" ]]; then
-            namespace_prefix="${namespace}_"
-          fi
+            namespace_prefix=""
+            if [[ -n "${duplicate_image_names[$image_name]}" && -n "$namespace" ]]; then
+                namespace_prefix="${namespace}_"
+            fi
 
-          local new_image_name="$ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/${platform_prefix}${namespace_prefix}${image_name_with_tag}"
-          echo "Docker Tag: $full_image_name -> $new_image_name"
-          docker tag "$full_image_name" "$new_image_name"
-          echo "Docker Push: $new_image_name"
-          docker push "$new_image_name"
-        done < images.txt
+            new_image_name="$ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/${platform_prefix}${namespace_prefix}${image_name_with_tag}"
+            echo "Docker Tag: $full_image_name -> $new_image_name"
+            docker tag "$full_image_name" "$new_image_name"
+            echo "Docker Push: $new_image_name"
+            docker push "$new_image_name"
+        done < images.yaml
