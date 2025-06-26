@@ -6,4 +6,5 @@
 #docker.io/kubernetesui/dashboard-web:1.6.0
 #jenkins/jenkins:lts
 #mongo:latest
-node:20.14.0-alpine
+#node:20.14.0-alpine
+redis:7.2-alpine
