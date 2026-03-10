@@ -31,8 +31,7 @@
 # milvusdb/milvus:v2.6.0
 # zilliz/attu:v2.6
 # ghcr.io/openclaw/openclaw:latest
-
+docker/dockerfile:1.7
 # node:22-bookworm
 # node:22-bookworm-slim
 # debian:bookworm-slim
-ghcr.io/openclaw/openclaw-sandbox:bookworm-slim
