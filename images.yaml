@@ -35,5 +35,4 @@
 node:22-bookworm
 node:22-bookworm-slim
 debian:bookworm-slim
-debian:bookworm-slim
 openclaw-sandbox:bookworm-slim
