@@ -32,7 +32,7 @@
 # zilliz/attu:v2.6
 # ghcr.io/openclaw/openclaw:latest
 
-node:22-bookworm
-node:22-bookworm-slim
-debian:bookworm-slim
-openclaw-sandbox:bookworm-slim
+# node:22-bookworm
+# node:22-bookworm-slim
+# debian:bookworm-slim
+ghcr.io/openclaw/openclaw-sandbox:bookworm-slim
