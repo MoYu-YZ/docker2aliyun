@@ -31,7 +31,8 @@
 # milvusdb/milvus:v2.6.0
 # zilliz/attu:v2.6
 # ghcr.io/openclaw/openclaw:latest
-docker/dockerfile:1.7
+# docker/dockerfile:1.7
 # node:22-bookworm
 # node:22-bookworm-slim
 # debian:bookworm-slim
+registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.12.0
